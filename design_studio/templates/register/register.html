@@ -39,8 +39,6 @@
             {% endif %}
         </div>
 
-        <!-- аналогично для email, password, password_confirm, username -->
-
         <div class="checkbox-group">
             <input type="checkbox"
                    name="{{ form.agree_data_processing.html_name }}"
@@ -66,7 +64,7 @@
 
     <div class="form-footer-link">
         Уже зарегистрированы?
-        <a href="{% url 'register' %}" class="fw-bold">Войти в аккаунт</a>
+        <a href="{% url 'login' %}" class="fw-bold">Войти в аккаунт</a>
     </div>
 </div>
 {% endblock %}

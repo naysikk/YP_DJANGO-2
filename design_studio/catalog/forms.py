@@ -3,6 +3,7 @@ import re
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import User
+from django.contrib.auth import authenticate
 
 class UserRegisterForm(forms.ModelForm):
     fio = forms.CharField(
@@ -35,7 +36,7 @@ class UserRegisterForm(forms.ModelForm):
     password = forms.CharField(
         label='Пароль',
         max_length=150,
-        widget=forms.TextInput(attrs={
+        widget=forms.PasswordInput(attrs={
             'class': 'form-control',
             'placeholder': '********'
         })
@@ -98,5 +99,42 @@ class UserRegisterForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+class UserLoginForm(forms.Form):
+
+    username = forms.CharField(
+        label='Логин',
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите логин',
+        })
+    )
+
+    password = forms.CharField(
+        label='Пароль',
+        required=True,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите пароль',
+        })
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        username = cleaned_data.get('username')
+        password = cleaned_data.get('password')
+
+        if username and password:
+            self.user_cache = authenticate(username=username, password=password)
+            if self.user_cache is None:
+                raise ValidationError('Неверный логин или пароль. Проверьте данные')
+            elif not self.user_cache.is_active:
+                raise ValidationError('Этот аккаунт деактивирован')
+        return cleaned_data
+
+    def get_user(self):
+        return getattr(self, 'user_cache', None)
+
 
 

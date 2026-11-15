@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход - Design.pro{% endblock %}
+
+{% block content %}
+<div class="form-box">
+    <div class="form-header">
+        <h2 class="form-title">Авторизация</h2>
+        <div class="field-help">Введите ваш логин и пароль</div>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+            <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">
+                Логин <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   name="{{ form.username.html_name }}"
+                   id="{{ form.username.id_for_label }}"
+                   value="{{ form.username.value|default:'' }}"
+                   class="{% if form.username.error or form.non_field_errors %}is-invalid{% endif %}"
+                   placeholder="Введите логин"
+                   required autofocus>
+
+            {% if form.username.errors %}
+                <div class="field-error">
+                    {% for error in form.username.error %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">
+                Пароль <span class="text-danger">*</span>
+            </label>
+            <input type="password"
+                   name="{{ form.password.html_name }}"
+                   id="{{ form.password.id_for_label }}"
+                   class="{% if form.password.errors or form.non_field_errors %}is-invalid{% endif %}"
+                   placeholder="Введите пароль"
+                   required>
+            {% if form.password.errors %}
+                <div class="field-error">
+                    {% for error in form.password.errors %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-submit">
+            <button type="submit" class="btn btn-primary btn-full">
+                Войти в систему
+            </button>
+        </div>
+    </form>
+
+    <div class="form-footer-link">
+        Ещё нет аккаунта?
+        <a href="{% url 'register' %}" class="fw-bold">Зарегистрируйтесь</a>
+    </div>
+</div>
+{% endblock %}
