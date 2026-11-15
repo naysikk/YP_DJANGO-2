@@ -11,33 +11,33 @@
 
 <header class="site-header">
     <div class="container header-inner">
-        <a class="site-logo" href="{% url 'index' %}">Design.pro</a>
+        <a class="site-logo" href="{% url 'register' %}">Design.pro</a>
 
         <nav class="main-nav">
             <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}"
-               href="{% url 'index' %}">Главная</a>
+               href="{% url 'register' %}">Главная</a>
             {% if user.is_authenticated %}
-                <a class="nav-link {% if request.resolver_match.url_name == 'cabinet' %}active{% endif %}"
-                   href="{% url 'cabinet' %}">Мои заявки</a>
-                <a class="nav-link {% if request.resolver_match.url_name == 'application-create' %}active{% endif %}"
-                   href="{% url 'application-create' %}">Создать заявку</a>
-                {% if user.is_staff or user.is_superuser %}
-                    <a class="nav-link admin-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}"
-                       href="{% url 'admin_panel' %}">Панель управления</a>
-                    <a class="nav-link superadmin-link" href="/superadmin/" target="_blank">Superadmin</a>
-                {% endif %}
+            <a class="nav-link {% if request.resolver_match.url_name == 'cabinet' %}active{% endif %}"
+               href="{% url 'register' %}">Мои заявки</a>
+            <a class="nav-link {% if request.resolver_match.url_name == 'application-create' %}active{% endif %}"
+               href="{% url 'registerregister' %}">Создать заявку</a>
+            {% if user.is_staff or user.is_superuser %}
+            <a class="nav-link admin-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}"
+               href="{% url 'register' %}">Панель управления</a>
+            <a class="nav-link superadmin-link" href="/superadmin/" target="_blank">Superadmin</a>
+            {% endif %}
             {% endif %}
         </nav>
 
         <div class="user-block">
             {% if user.is_authenticated %}
-                <span class="user-info">
+            <span class="user-info">
                         {{ user.username }}{% if user.fio %} ({{ user.fio }}){% endif %}
                     </span>
-                <a href="{% url 'logout' %}" class="btn btn-sm btn-danger">Выход</a>
+            <a href="{% url 'register' %}" class="btn btn-sm btn-danger">Выход</a>
             {% else %}
-                <a href="{% url 'login' %}" class="btn btn-sm">Вход</a>
-                <a href="{% url 'register' %}" class="btn btn-sm">Регистрация</a>
+            <a href="{% url 'register' %}" class="btn btn-sm">Вход</a>
+            <a href="{% url 'register' %}" class="btn btn-sm">Регистрация</a>
             {% endif %}
         </div>
     </div>
@@ -45,12 +45,12 @@
 
 <div class="container messages-container">
     {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
-                <span>{{ message }}</span>
-                <button type="button" class="alert-close" onclick="this.parentElement.remove()" title="Закрыть">Закрыть</button>
-            </div>
-        {% endfor %}
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
+        <span>{{ message }}</span>
+        <button type="button" class="alert-close" onclick="this.parentElement.remove()" title="Закрыть">Закрыть</button>
+    </div>
+    {% endfor %}
     {% endif %}
 </div>
 

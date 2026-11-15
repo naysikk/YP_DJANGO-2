@@ -1,5 +1,3 @@
-
-
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,6 +17,7 @@ INSTALLED_APPS = [
     'catalog.apps.CatalogConfig',
 ]
 
+AUTH_USER_MODEL = 'catalog.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

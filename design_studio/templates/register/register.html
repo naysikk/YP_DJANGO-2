@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Регистрация - Design.pro{% endblock %}
+
+{% block content %}
+<div class="form-box">
+    <div class="form-header">
+        <h2 class="form-title">Регистрация в Design.pro</h2>
+        <div class="field-help">Заполните поля для создания учетной записи пользователя</div>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="{{ form.fio.id_for_label }}">
+                {{ form.fio.label }} <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   name="{{ form.fio.html_name }}"
+                   id="{{ form.fio.id_for_label }}"
+                   value="{{ form.fio.value|default:'' }}"
+                   class="{% if form.fio.errors %}is-invalid{% endif %}"
+                   placeholder="Иванов Иван Иванович"
+                   required>
+            <div class="field-help">Только кириллические буквы, дефис и пробелы</div>
+            {% if form.fio.errors %}
+                <div class="field-error">
+                    {% for error in form.fio.errors %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- аналогично для email, password, password_confirm, username -->
+
+        <div class="checkbox-group">
+            <input type="checkbox"
+                   name="{{ form.agree_data_processing.html_name }}"
+                   id="{{ form.agree_data_processing.id_for_label }}"
+                   class="{% if form.agree_data_processing.errors %}is-invalid{% endif %}"
+                   {% if form.agree_data_processing.value %}checked{% endif %}
+                   required>
+            <label for="{{ form.agree_data_processing.id_for_label }}">
+                Я даю согласие на обработку персональных данных
+                <span class="text-danger">*</span>
+            </label>
+        </div>
+        {% if form.agree_data_processing.errors %}
+            <div class="field-error">
+                {% for error in form.agree_data_processing.errors %}{{ error }}{% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="form-submit">
+            <button type="submit" class="btn btn-primary btn-full">Зарегистрироваться</button>
+        </div>
+    </form>
+
+    <div class="form-footer-link">
+        Уже зарегистрированы?
+        <a href="{% url 'register' %}" class="fw-bold">Войти в аккаунт</a>
+    </div>
+</div>
+{% endblock %}
