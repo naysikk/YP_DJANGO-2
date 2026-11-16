@@ -15,4 +15,7 @@ urlpatterns =[
     path('admin-panel/', views.admin_panel_view, name='admin-panel'),
     path('admin-panel/application/<int:pk>/in-progress/', views.admin_change_status_in_progress, name='admin-status-in-progress'),
     path('admin-panel/application/<int:pk>/completed/', views.admin_change_status_completed, name='admin-status-completed'),
+
+    path('admin-panel/category/add/', views.admin_add_category, name='admin-add-category'),
+    path('admin-panel/category/<int:pk>/delete/', views.admin_delete_category, name='admin-delete-category'),
 ]

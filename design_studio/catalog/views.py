@@ -29,7 +29,7 @@ def register_view(request):
 def login_view(request):
     if request.user.is_authenticated:
         if request.user.is_staff or request.user.is_superuser:
-            return redirect('admin_panel')
+            return redirect('admin-panel')
         return redirect('index')
 
     if request.method == 'POST':
@@ -43,7 +43,7 @@ def login_view(request):
             if next_url:
                 return redirect(next_url)
             if user.is_staff or user.is_superuser:
-                return redirect('admin_panel')
+                return redirect('admin-panel')
             return redirect('index')
         else:
             messages.error(request, 'Неверный логин или пароль')
@@ -198,6 +198,37 @@ def admin_change_status_completed(request, pk):
         else:
             messages.error(request, 'Для завершения заявки обязательно загрузите изображение дизайна')
     return redirect('admin-panel')
+
+@user_passes_test(is_admin, login_url='login')
+def admin_add_category(request):
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            category = form.save()
+            messages.success(request, f'Категория "{category.name}" успешно добавлена')
+        else:
+            for field, errs in form.errors.items():
+                for e in errs:
+                    messages.error(request, f'Ошибка категории: {e}')
+    return redirect('admin-panel')
+
+@user_passes_test(is_admin, login_url='login')
+def admin_delete_category(request, pk):
+    category =get_object_or_404(Category, pk=pk)
+
+    if request.method == 'POST':
+        name = category.name
+        apps_count = category.applications.count()
+        category.delete()
+        messages.success(
+            request,
+            f'Категория "{name}" и все привязанные заявки ({apps_count} шт.) были безвозвратно удалены'
+        )
+        return redirect('admin-panel')
+
+    return render(request,'catalog/category_confirm_delete.html', {'category': category})
+
+
 
 
 
