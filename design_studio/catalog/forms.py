@@ -134,7 +134,7 @@ class UserLoginForm(forms.Form):
         return cleaned_data
 
     def get_user(self):
-        return getattr(self, 'user_cache', None)
+        return getattr(self, 'user', None)
 
 
 

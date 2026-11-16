@@ -50,6 +50,16 @@ def login_view(request):
 
     return render(request, 'register/login.html', {'form': form})
 
+def index(request):
+    in_progress_count = 1,
+    completed_apps = 1,
+
+    contex ={
+        'in_progress_count': in_progress_count,
+        'completed_apps': completed_apps,
+    }
+    return render(request, 'index.html', contex)
+
 
 
 

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная - Design.pro{% endblock %}
+
+{% block content %}
+<div class="hero-box">
+    <div class="hero-content">
+        <h1 class="hero-title">
+            Студия интерьеров "Design.pro"
+        </h1>
+        <p class="hero-desc">
+            Проектирование и создание вариантов оформления интерьеров жилых помещений. Загрузите план помещения, и дизайнеры подготовят индивидуальный проект.
+        </p>
+        <div class="hero-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'application-create' %}" class="btn btn-primary">Создать заявку</a>
+                <a href="{% url 'cabinet' %}" class="btn">Мои заявки</a>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn btn-primary">Регистрация</a>
+                <a href="{% url 'login' %}" class="btn">Вход в кабинет</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="counter-box">
+        <div class="counter-label">Заявок в работе сейчас</div>
+         <div class="counter-number" id="in-progress-counter">{{ in_progress_count }}</div>
+        <div class="counter-caption">В статусе "Принято в работу"</div>
+    </div>
+</div>
+
+<div class="box">
+    <h2 class="box-title">Последние выполненные проекты</h2>
+    {% if completed_apps %}
+        <div class="cards-grid">
+            {% for app in completed_apps %}
+                <div class="project-card">
+                    #надо вставить фотки
+                    {% if app.design_image %}
+                        <img src="{{ app.design_image.url }}" alt="{{ app.title }}">
+                    {% elif app.photo %}
+                        <img src="{{ app.photo.url }}" alt="{{ app.title }}">
+                    {% else %}
+                        <div class="project-placeholder">
+                            Изображение отсутствует
+                        </div>
+                    {% endif %}
+
+                    <div class="project-body">
+                        <div>
+                            <span class="badge badge-category">{{ app.category.name }}</span>
+                        </div>
+
+                        <div class="project-title" title="{{ app.title }}">
+                            {{ app.title }}
+                        </div>
+
+                        <div class="project-desc">
+                            {{ app.description }}
+                        </div>
+
+                        <div class="project-date">
+                            {{ app.created_at|date:"d.m.Y H:i" }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div>
+            Пока нет выполненных проектов со статусом "Выполнено"
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
