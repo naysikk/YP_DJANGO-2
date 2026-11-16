@@ -43,6 +43,18 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+def validate_design_file(file):
+    max_size_mb = 5
+    if file.size > max_size_mb * 1024 * 1024:
+        raise ValidationError(f'Максимальный размер файла не должен превышать {max_size_mb} MБ')
+
+    ext = os.path.splitext(file.name)[1].lower()
+    valid_extensions = ['.jpg', '.jpeg', '.png', '.bmp']
+    if ext not in valid_extensions:
+        raise ValidationError(
+            f'Недоступный формат файла({ext}). Разрешён только: .jpg, .jpeg, .png, .bmp'
+        )
+
 class Application(models.Model):
     STATUS_NEW = 'new'
     STATUS_IN_PROGRESS = 'in-progress'
@@ -115,4 +127,8 @@ class Application(models.Model):
 
     @property
     def is_deletable(self):
+        return self.status == self.STATUS_NEW,
+
+    @property
+    def can_change_status(self):
         return self.status == self.STATUS_NEW,

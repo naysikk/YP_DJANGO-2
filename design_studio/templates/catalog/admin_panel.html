@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Панель администратора — Design.pro{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <div>
+        <h2 class="box-title">Панель администратора</h2>
+        <div class="admin-subtitle">Управление категориями и смена статусов заявок клиентов</div>
+    </div>
+    <div>
+        <a href="/superadmin/" target="_blank" class="btn btn-sm">Django Superadmin</a>
+    </div>
+</div>
+
+<!-- БЛОК 1: Управление категориями заявок -->
+<div class="box">
+    <div class="box-header">
+        <div class="box-title">1. Управление категориями заявок</div>
+    </div>
+
+    <div class="cat-manage-grid">
+        <!-- Форма добавления категории -->
+        <div>
+<!--            Todo-->
+            <div class="field-help">Название категории должно быть уникальным</div>
+        </div>
+
+        <!-- Список существующих категорий -->
+        <div>
+            <div class="cat-list-title">Существующие категории:</div>
+            <div class="cat-list">
+                {% for cat in categories %}
+                    <div class="cat-tag">
+                        <span><strong>{{ cat.name }}</strong> ({{ cat.applications.count }})</span>
+                        <button type="button" class="btn btn-danger btn-sm cat-del-btn" onclick="document.getElementById('delCat{{ cat.pk }}').showModal()">Удалить</button>
+                    </div>
+
+                    <!-- Диалог удаления категории с предупреждением о каскадном удалении -->
+                    <dialog id="delCat{{ cat.pk }}">
+                        <div class="dialog-title text-danger">Удаление категории «{{ cat.name }}»</div>
+                        <div class="alert alert-danger">
+                            При удалении категории будут каскадно удалены ВСЕ заявки данной категории ({{ cat.applications.count }} шт.).
+                        </div>
+                        <p class="dialog-message">
+                            Вы абсолютно уверены, что хотите безвозвратно удалить категорию <strong>«{{ cat.name }}»</strong>?
+                        </p>
+                        <div class="dialog-actions">
+                            <button type="button" class="btn btn-sm" onclick="this.closest('dialog').close()">Отмена</button>
+<!--                            Todo-->
+                        </div>
+                    </dialog>
+                {% empty %}
+                    <span class="text-muted">Категорий пока нет.</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- БЛОК 2: Заявки пользователей и смена статусов -->
+<div class="box">
+    <div class="box-header">
+        <div class="box-title">2. Заявки пользователей и смена статусов</div>
+        <div class="filter-group">
+            <a href="{% url 'admin-panel' %}?status=all" class="filter-btn {% if status_filter == 'all' or not status_filter %}active{% endif %}">Все ({{ total_count }})</a>
+            <a href="{% url 'admin-panel' %}?status=new" class="filter-btn {% if status_filter == 'new' %}active{% endif %}">Новые ({{ new_count }})</a>
+            <a href="{% url 'admin-panel' %}?status=in_progress" class="filter-btn {% if status_filter == 'in_progress' %}active{% endif %}">В работе ({{ in_progress_count }})</a>
+            <a href="{% url 'admin-panel' %}?status=completed" class="filter-btn {% if status_filter == 'completed' %}active{% endif %}">Выполненные ({{ completed_count }})</a>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-thumb">№</th>
+                    <th class="col-date">Дата</th>
+                    <th>Клиент</th>
+                    <th>Заявка</th>
+                    <th class="col-category">Категория</th>
+                    <th class="col-category">План/Дизайн</th>
+                    <th class="col-status">Статус</th>
+                    <th class="col-action">Смена статуса</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                    <tr>
+                        <td class="col-date-text">#{{ app.pk }}</td>
+                        <td class="col-date-text">
+                            {{ app.created_at|date:"d.m.Y H:i" }}
+                        </td>
+                        <td>
+                            <div class="fw-bold">{{ app.user.username }}</div>
+                            {% if app.user.fio %}<div class="text-muted small">{{ app.user.fio }}</div>{% endif %}
+                        </td>
+                        <td>
+                            <div class="app-title">{{ app.title }}</div>
+                            <div class="app-desc">{{ app.description|truncatewords:8 }}</div>
+                            {% if app.comment %}
+                                <div class="comment-text">
+                                    <strong>Коммент:</strong> {{ app.comment }}
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge badge-category">{{ app.category.name }}</span>
+                        </td>
+                        <td>
+                            <div class="table-thumb-cell">
+                                {% if app.photo %}
+                                    <a href="{{ app.photo.url }}" target="_blank" title="План помещения">
+                                        <img src="{{ app.photo.url }}" alt="План" class="plan-thumb">
+                                    </a>
+                                {% endif %}
+                                {% if app.design_image %}
+                                    <a href="{{ app.design_image.url }}" target="_blank" title="Готовый дизайн">
+                                        <img src="{{ app.design_image.url }}" alt="Дизайн" class="design-thumb">
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <td>
+                            {% if app.status == 'new' %}
+                                <span class="badge badge-new">Новая</span>
+                            {% elif app.status == 'in-progress' %}
+                                <span class="badge badge-progress">В работе</span>
+                            {% elif app.status == 'completed' %}
+                                <span class="badge badge-completed">Выполнено</span>
+                            {% endif %}
+                        </td>
+                        <td class="col-action-cell">
+                            {% if app.can_change_status %}
+                                <!-- Кнопка 1: В работу -->
+                                <button type="button" class="btn btn-sm btn-in-progress" onclick="document.getElementById('inProg{{ app.pk }}').showModal()">
+                                    В работу
+                                </button>
+
+                                <!-- Кнопка 2: Выполнить -->
+                                <button type="button" class="btn btn-success btn-sm" onclick="document.getElementById('comp{{ app.pk }}').showModal()">
+                                    Выполнить
+                                </button>
+
+                                <!-- Диалог: Смена на «Принято в работу» (комментарий обязателен) -->
+                                <dialog id="inProg{{ app.pk }}">
+                                    <div class="dialog-title">Принять заявку #{{ app.pk }} в работу</div>
+                                    <form method="post" action="{% url 'admin-status-in-progress' app.pk %}">
+                                        {% csrf_token %}
+                                        <div class="form-group text-start">
+                                            <label>Укажите комментарий <span class="text-danger">*</span></label>
+                                            <textarea name="comment" rows="3" required placeholder="Например: Взято в работу дизайнером..."></textarea>
+                                            <div class="field-help">Комментарий обязателен по условиям ТЗ</div>
+                                        </div>
+                                        <div class="dialog-actions">
+                                            <button type="button" class="btn btn-sm" onclick="this.closest('dialog').close()">Отмена</button>
+                                            <button type="submit" class="btn btn-primary btn-sm">Перевести «В работу»</button>
+                                        </div>
+                                    </form>
+                                </dialog>
+
+                                <!-- Диалог: Смена на «Выполнено» (дизайн обязателен) -->
+                                <dialog id="comp{{ app.pk }}">
+                                    <div class="dialog-title text-success">Завершить заявку #{{ app.pk }}</div>
+                                    <form method="post" action="{% url 'admin-status-completed' app.pk %}" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="form-group text-start">
+                                            <label>Прикрепите изображение дизайна <span class="text-danger">*</span></label>
+                                            <input type="file" name="design_image" accept=".jpg,.jpeg,.png,.bmp" required>
+                                            <div class="field-help">Форматы: jpg, jpeg, png, bmp (до 5 Мб)</div>
+                                        </div>
+                                        <div class="dialog-actions">
+                                            <button type="button" class="btn btn-sm" onclick="this.closest('dialog').close()">Отмена</button>
+                                            <button type="submit" class="btn btn-success btn-sm">Сохранить «Выполнено»</button>
+                                        </div>
+                                    </form>
+                                </dialog>
+                            {% else %}
+                                <span class="text-muted small">Смена невозможна</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            Заявок не найдено.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

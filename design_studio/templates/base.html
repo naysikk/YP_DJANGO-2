@@ -23,7 +23,7 @@
                href="{% url 'application-create' %}">Создать заявку</a>
             {% if user.is_staff or user.is_superuser %}
             <a class="nav-link admin-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}"
-               href="{% url 'index' %}">Панель управления</a>
+               href="{% url 'admin-panel' %}">Панель управления</a>
             <a class="nav-link superadmin-link" href="/superadmin/" target="_blank">Superadmin</a>
             {% endif %}
             {% endif %}

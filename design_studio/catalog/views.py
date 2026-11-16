@@ -1,10 +1,13 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib import messages
-from .forms import UserRegisterForm, UserLoginForm, ApplicationCreateForm
-from .models import Application
+from .forms import UserRegisterForm, UserLoginForm, ApplicationCreateForm, CategoryForm, StatusToInProgressForm, StatusToCompletedForm
+from .models import Application, Category
 
+
+def is_admin(user):
+    return user.is_authenticated and (user.is_staff or user.is_superuser)
 
 def register_view(request):
     if request.user.is_authenticated:
@@ -126,6 +129,79 @@ def delete_application_view(request, pk):
         return redirect('cabinet')
 
     return render(request, 'catalog/application_confirm_delete.html', {'application': application})
+
+
+@user_passes_test(is_admin, login_url='login')
+def admin_panel_view(request):
+    status_filter = request.GET.get('status', 'all')
+    all_apps = Application.objects.select_related('user', 'category').all()
+
+    total_count = all_apps.count()
+    new_count = all_apps.filter(status=Application.STATUS_NEW).count()
+    in_progress_count = all_apps.filter(status=Application.STATUS_IN_PROGRESS).count()
+    completed_count = all_apps.filter(status=Application.STATUS_COMPLETED).count()
+
+    if status_filter in [Application.STATUS_IN_PROGRESS, Application.STATUS_COMPLETED]:
+        application = all_apps.filter(status=status_filter).order_by('-created_at')
+    else:
+        application = all_apps.order_by('-created_at')
+
+    categories = Category.objects.all().order_by("-id")
+    category_form = CategoryForm()
+
+    context = {
+        'applications': application,
+        'categories': categories,
+        'category_form': category_form,
+        'status_filter': status_filter,
+        'total_count': total_count,
+        'new_count': new_count,
+        'in_progress_count': in_progress_count,
+        'completed_count': completed_count,
+    }
+    return render(request, 'catalog/admin_panel.html', context)
+
+@user_passes_test(is_admin, login_url='login')
+def admin_change_status_in_progress(request, pk):
+    application = get_object_or_404(Application, pk=pk)
+
+    if application.status != Application.STATUS_NEW:
+        messages.error(request, 'Смена статуса с "Принято в работу" или "Выполнено" невозможна')
+        return redirect('admin-panel')
+
+    if request.method == 'POST':
+        form = StatusToInProgressForm(request.POST)
+        if form.is_valid():
+            application.status = Application.STATUS_IN_PROGRESS
+            application.comment = form.cleaned_data['comment']
+            application.save()
+            messages.success(request, f'Заявка #{application.pk} переведена в статус "Принято в работу"')
+        else:
+            messages.error(request, 'Для перевода заявки в работу обязательно укажите комментарий')
+    return redirect('admin-panel')
+
+@user_passes_test(is_admin, login_url='login')
+def admin_change_status_completed(request, pk):
+    application = get_object_or_404(Application, pk=pk)
+
+    if application.status != Application.STATUS_NEW:
+        messages.error(request, 'Смена статуса с "Принято в работу" или "Выполнено" невозможна')
+        return redirect('admin-panel')
+
+    if request.method == 'POST':
+        form = StatusToCompletedForm(request.POST, request.FILES)
+        if form.is_valid():
+            application.status = Application.STATUS_COMPLETED
+            application.design_image = form.cleaned_data['design_image']
+            application.save()
+            messages.success(request, f'Заявка #{application.pk} успешно выполнена и прикреплён дизайн!')
+        else:
+            messages.error(request, 'Для завершения заявки обязательно загрузите изображение дизайна')
+    return redirect('admin-panel')
+
+
+
+
 
 
 

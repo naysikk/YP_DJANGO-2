@@ -2,7 +2,7 @@ import re
 
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import User, Application, validate_photo_file, Category
+from .models import User, Application, validate_photo_file, Category, validate_design_file
 from django.contrib.auth import authenticate
 
 class UserRegisterForm(forms.ModelForm):
@@ -199,3 +199,37 @@ class CategoryForm(forms.ModelForm):
         if Category.objects.filter(name__iexact=name).exists():
             raise ValidationError('Категория с таким названием уже существует')
         return name
+
+class StatusToInProgressForm(forms.Form):
+    comment = forms.CharField(
+        label = 'Комментарий администратора',
+        required = True,
+        widget = forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': 'Укажите комментарий к заявке (назначенный дизайнер, сроки, уточнения)...'
+        }),
+        error_messages = {
+            'required': 'Для перевода в статус "Принято в работу" необходимо обязательно указать комментарий'
+        }
+    )
+
+class StatusToCompletedForm(forms.Form):
+    design_image = forms.ImageField(
+        label='Изображение созданного дизайна',
+        required=True,
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': '.jpg, .jpeg, .png, .bmp'
+        }),
+        error_messages = {
+            'required': 'Для перевода в статус "Выполнено необходимо обязательно прикрепить изображение дизайна"'
+        }
+
+    )
+
+    def clean_design_image(self):
+        image = self.cleaned_data.get('design_image')
+        if image:
+            validate_design_file(image)
+        return image
