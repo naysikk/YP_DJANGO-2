@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib import messages
 from .forms import UserRegisterForm, UserLoginForm, ApplicationCreateForm
@@ -107,6 +107,27 @@ def cabinet_view(request):
     }
 
     return render(request, 'catalog/cabinet.html', context)
+
+@login_required
+def delete_application_view(request, pk):
+    application = get_object_or_404(Application, pk=pk, user=request.user)
+
+    if not application.is_deletable:
+        messages.error(
+            request,
+            "Заявку нельзя изменить или удалить, так как её статус уже изменён администратором на 'Принято в работу' или 'Выполнено' "
+        )
+        return redirect('cabinet')
+
+    if request.method == 'POST':
+        title = application.title
+        application.delete()
+        messages.success(request, f'Заявка "{title}" была успешно удалена')
+        return redirect('cabinet')
+
+    return render(request, 'catalog/application_confirm_delete.html', {'application': application})
+
+
 
 
 

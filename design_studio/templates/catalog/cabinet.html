@@ -44,7 +44,8 @@
                 <th class="col-date">Дата</th>
                 <th>Название и описание</th>
                 <th class="col-category">Категория</th>
-                <th class="col-status">План</th>
+                <th class="col-thumb">План</th>
+                <th class="col-status">Статус</th>
                 <th>Ответ студии</th>
                 <th class="col-action">Действие</th>
             </tr>
@@ -68,7 +69,7 @@
                 <td>
                     {% if app.photo %}
                     <a href="{{ app.photo.url }}" target="_blank">
-                        <img src="{{ app.photo.url }}" alt="План" class="app-thumb">
+                        <img src="{{ app.photo.url }}" alt="План" width="300" class="app-thumb">
                     </a>
                     {% else %}
                     <span class="text-muted">-</span>
@@ -122,7 +123,10 @@
                         <div class="dialog-actions">
                             <button type="button" class="btn btn-sm" onclick="this.closest('dialog').close()">Отмена
                             </button>
-                            <!--TODO добавить форму удаления-->
+                            <form method="post" action="{% url 'application-delete' app.pk %}" class="inline-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">Да, удалить</button>
+                            </form>
                         </div>
                     </dialog>
                     {% else %}
