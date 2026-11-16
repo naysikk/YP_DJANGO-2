@@ -1,10 +1,145 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block title %}Личный кабинет - Design.pro{% endblock %}
+
+{% block content %}
+<div class="box">
+
+    <div class="box-header">
+        <div>
+            <h2 class="box-title">Мои заявки на дизайн</h2>
+            <div class="box-subtitle">
+                Пользователь: <b>{{ user.fio|default:user.username }}</b>
+            </div>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <span class="filter-label">Фильтр:</span>
+        <div class="filter-group">
+            <a href="{% url 'cabinet' %}?status=all"
+               class="filter-btn {% if current_filter == 'all' or not current_filter %}active{% endif %}">
+                Все ({{ total_count }})
+            </a>
+            <a href="{% url 'cabinet' %}?status=new"
+               class="filter-btn {% if current_filter == 'new' %}active{% endif %}">
+                Новые ({{ new_count }})
+            </a>
+            <a href="{% url 'cabinet' %}?status=in_progress"
+               class="filter-btn {% if current_filter == 'in_progress' %}active{% endif %}">
+                В работе ({{ in_progress_count }})
+            </a>
+            <a href="{% url 'cabinet' %}?status=compuled"
+               class="filter-btn {% if current_filter == 'compuled' %}active{% endif %}">
+                Выложенные ({{ completed_count }})
+            </a>
+        </div>
+    </div>
+
+    {% if applications %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th class="col-date">Дата</th>
+                <th>Название и описание</th>
+                <th class="col-category">Категория</th>
+                <th class="col-status">План</th>
+                <th>Ответ студии</th>
+                <th class="col-action">Действие</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for app in applications %}
+            <tr>
+                <td class="col-date-text">
+                    {{ app.created_at|date:"d.m.Y H:i" }}
+                </td>
+
+                <td>
+                    <div class="app-title">{{ app.title }}</div>
+                    <div class="app-desc">{{ app.description }}</div>
+                </td>
+
+                <td>
+                    <span class="bange bange-category">{{ app.category.name }}</span>
+                </td>
+
+                <td>
+                    {% if app.photo %}
+                    <a href="{{ app.photo.url }}" target="_blank">
+                        <img src="{{ app.photo.url }}" alt="План" class="app-thumb">
+                    </a>
+                    {% else %}
+                    <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if app.status == 'new' %}
+                    <span class="badge badge-new">Новая</span>
+                    {% elif app.status == "in_progress" %}
+                    <span class="badge babge-progress">Принято в работу</span>
+                    {% elif app.status == "completed" %}
+                    <span class="badge badge-compileted">Выполнено</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if app.status == 'in_progress' and app.comment %}
+                    <div class="comment-text"><strong>Комментарий:</strong>{{ app.comment }}</div>
+                    {% elif app.status == 'completed' %}
+                    <div class="complete-reply">
+                        {% if app.design_image %}
+                        <a href="{{ app.design_image.url }}" target="_blank" class="btn btn-sm success">Дизайн</a>
+                        {% endif %}
+                        {% if app.comment %}
+                        <span class="comment-note">{{ app.comment }}</span>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+
+                <td class="col-action-cell">
+                    {% if app.is_deletable %}
+                    <button type="button" class="btn btn-sm"
+                            onclick="document.getElementById('delModal{{ app.pk }}').showModal()">
+                        Удалить
+                    </button>
+
+                    <dialog id="delModal{{ app.pk }}">
+                        <div class="dialog-title text-danger">Подтверждение удаления</div>
+                        <p>
+                            Вы действительно хотите удалить заявку:
+                            <strong>"{{ app.title }}"</strong>?
+                        </p>
+                        <div class="alert alert-warning">
+                            Внимание: данное действие необратимо. Удаление доступно только для заявок со статусом
+                            "Новая"
+                        </div>
+                        <div class="dialog-actions">
+                            <button type="button" class="btn btn-sm" onclick="this.closest('dialog').close()">Отмена
+                            </button>
+                            <!--TODO добавить форму удаления-->
+                        </div>
+                    </dialog>
+                    {% else %}
+                    <span class="text-muted small">Недоступно</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p class="empty-stste-text">Заявок с выбранным фильтром не найдено</p>
+        <a href="{% url 'application-create' %}" class="btn bnt-sm-primary">Создать первую заявку</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

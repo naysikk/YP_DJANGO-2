@@ -18,7 +18,7 @@
                href="{% url 'index' %}">Главная</a>
             {% if user.is_authenticated %}
             <a class="nav-link {% if request.resolver_match.url_name == 'cabinet' %}active{% endif %}"
-               href="{% url 'index' %}">Мои заявки</a>
+               href="{% url 'cabinet' %}">Мои заявки</a>
             <a class="nav-link {% if request.resolver_match.url_name == 'application-create' %}active{% endif %}"
                href="{% url 'application-create' %}">Создать заявку</a>
             {% if user.is_staff or user.is_superuser %}

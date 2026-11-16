@@ -50,8 +50,8 @@ def login_view(request):
     return render(request, 'register/login.html', {'form': form})
 
 def index(request):
-    in_progress_count = 1,
-    completed_apps = 1,
+    in_progress_count = Application.objects.filter(status=Application.STATUS_IN_PROGRESS).count(),
+    completed_apps = Application.objects.filter(status=Application.STATUS_COMPLETED).select_related('category').order_by('-created_at')[:4]
 
     contex ={
         'in_progress_count': in_progress_count,
@@ -81,6 +81,33 @@ def create_application_view(request):
         form = ApplicationCreateForm()
 
     return render(request, 'catalog/application_form.html', {'form': form})
+
+@login_required
+def cabinet_view(request):
+    user_apps = Application.objects.filter(user=request.user).select_related('category')
+
+    total_count = user_apps.count()
+    new_count = user_apps.filter(status=Application.STATUS_NEW).count()
+    in_progress_count = user_apps.filter(status=Application.STATUS_IN_PROGRESS).count()
+    completed_count = user_apps.filter(status=Application.STATUS_COMPLETED).count()
+
+    current_filter = request.GET.get('status', 'all')
+    if current_filter in [Application.STATUS_NEW, Application.STATUS_IN_PROGRESS, Application.STATUS_COMPLETED]:
+        user_apps = user_apps.filter(status=current_filter)
+
+    user_apps = user_apps.order_by('-created_at')
+
+    context = {
+        'applications': user_apps,
+        'current_filter': current_filter,
+        'total_count': total_count,
+        'new_count': new_count,
+        'in_progress_count': in_progress_count,
+        'completed_count': completed_count,
+    }
+
+    return render(request, 'catalog/cabinet.html', context)
+
 
 
 
