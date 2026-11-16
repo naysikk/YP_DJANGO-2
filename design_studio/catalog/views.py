@@ -1,7 +1,9 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib import messages
-from .forms import UserRegisterForm, UserLoginForm
+from .forms import UserRegisterForm, UserLoginForm, ApplicationCreateForm
+from .models import Application
 
 
 def register_view(request):
@@ -61,6 +63,24 @@ def logout_view(request):
     logout(request)
     messages.info(request,'Вы успешно вышли из системы')
     return redirect('index')
+
+@login_required
+def create_application_view(request):
+    if request.method == 'POST':
+        form = ApplicationCreateForm(request.POST, request.FILES)
+        if form.is_valid():
+            application = form.save(commit=False)
+            application.user = request.user
+            application.status = Application.STATUS_NEW
+            application.save()
+            messages.success(request, f'Заявка "{application.title}" успешно создана и получила статус "Новая"!!')
+            return redirect('index')
+        else:
+            messages.error(request, 'Пожалуйста, проверьте корректность заполнения полей заявки')
+    else:
+        form = ApplicationCreateForm()
+
+    return render(request, 'catalog/application_form.html', {'form': form})
 
 
 

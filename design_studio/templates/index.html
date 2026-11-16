@@ -13,7 +13,7 @@
         </p>
         <div class="hero-actions">
             {% if user.is_authenticated %}
-                <a href="{% url 'index' %}" class="btn btn-primary">Создать заявку</a>
+                <a href="{% url 'application-create' %}" class="btn btn-primary">Создать заявку</a>
                 <a href="{% url 'index' %}" class="btn">Мои заявки</a>
             {% else %}
                 <a href="{% url 'register' %}" class="btn btn-primary">Регистрация</a>

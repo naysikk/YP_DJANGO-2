@@ -2,7 +2,7 @@ import re
 
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import User
+from .models import User, Application, validate_photo_file, Category
 from django.contrib.auth import authenticate
 
 class UserRegisterForm(forms.ModelForm):
@@ -136,5 +136,66 @@ class UserLoginForm(forms.Form):
     def get_user(self):
         return getattr(self, 'user_cache', None)
 
+class ApplicationCreateForm(forms.ModelForm):
+    class Meta:
+        model = Application
+        fields = ('title', 'description', 'category', 'photo')
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Например: Дизайн гостинной в стиле лофт'
+            }),
 
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Подробно опишите требования к интерьеру, бюджет, особенности помещения и т.д.'
+            }),
 
+            'category': forms.Select(attrs={
+                'class': 'form-select',
+            }),
+
+            'photo': forms.FileInput(attrs={
+                'class': 'form-control',
+                "accept": '.jpg, .jpeg, .png, .bmp'
+            }),
+        }
+
+        labels = {
+            'title': 'Название заявки',
+            'description': 'Описание заявки',
+            'category': 'Категория дизайна',
+            'photo': 'Фото помещения или его план (jpg, jpeg, png, bmp до 2 МБ)',
+        }
+
+        def clean_photo(self):
+            photo = self.cleaned_data.get('photo')
+            if photo:
+                validate_photo_file(photo)
+            else:
+                raise ValidationError('Прикрепление фото помещения или плана обязательно')
+            return photo
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Например: Скандинавский стиль или 3D-визуализация'
+            })
+        }
+
+        labels={
+            'name': 'Название категории'
+        }
+
+    def clean_name(self):
+        name = self.cleaned_data.get('name', '').strip()
+        if not name:
+            raise ValidationError('Название категории не может быть пустым')
+        if Category.objects.filter(name__iexact=name).exists():
+            raise ValidationError('Категория с таким названием уже существует')
+        return name

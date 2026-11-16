@@ -20,7 +20,7 @@
             <a class="nav-link {% if request.resolver_match.url_name == 'cabinet' %}active{% endif %}"
                href="{% url 'index' %}">Мои заявки</a>
             <a class="nav-link {% if request.resolver_match.url_name == 'application-create' %}active{% endif %}"
-               href="{% url 'index' %}">Создать заявку</a>
+               href="{% url 'application-create' %}">Создать заявку</a>
             {% if user.is_staff or user.is_superuser %}
             <a class="nav-link admin-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}"
                href="{% url 'index' %}">Панель управления</a>

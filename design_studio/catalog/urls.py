@@ -8,4 +8,5 @@ urlpatterns =[
     path('', views.index, name='index'),
 
     path('logout/', views.logout_view, name='logout'),
+    path('application/create/',views.create_application_view, name='application-create'),
 ]
