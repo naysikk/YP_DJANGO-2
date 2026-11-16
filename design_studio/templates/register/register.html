@@ -39,6 +39,77 @@
             {% endif %}
         </div>
 
+         <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">
+                {{ form.username.label }} <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   name="{{ form.username.html_name }}"
+                   id="{{ form.username.id_for_label }}"
+                   value="{{ form.username.value|default:'' }}"
+                   class="{% if form.username.errors %}is-invalid{% endif %}"
+                   placeholder="ivanov-ivan"
+                   required>
+            <div class="field-help">Только латинские буквы и дефис, уникальный</div>
+            {% if form.username.errors %}
+                <div class="field-error">
+                    {% for error in form.username.errors %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.email.id_for_label }}">
+                {{ form.email.label }} <span class="text-danger">*</span>
+            </label>
+            <input type="email"
+                   name="{{ form.email.html_name }}"
+                   id="{{ form.email.id_for_label }}"
+                   value="{{ form.email.value|default:'' }}"
+                   class="{% if form.email.errors %}is-invalid{% endif %}"
+                   placeholder="ivanov@example.com"
+                   required>
+            {% if form.email.errors %}
+                <div class="field-error">
+                    {% for error in form.email.errors %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">
+                {{ form.password.label }} <span class="text-danger">*</span>
+            </label>
+            <input type="password"
+                   name="{{ form.password.html_name }}"
+                   id="{{ form.password.id_for_label }}"
+                   class="{% if form.password.errors %}is-invalid{% endif %}"
+                   placeholder="Введите пароль"
+                   required>
+            {% if form.password.errors %}
+                <div class="field-error">
+                    {% for error in form.password.errors %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.password_confirm.id_for_label }}">
+                {{ form.password_confirm.label }} <span class="text-danger">*</span>
+            </label>
+            <input type="password"
+                   name="{{ form.password_confirm.html_name }}"
+                   id="{{ form.password_confirm.id_for_label }}"
+                   class="{% if form.password_confirm.errors %}is-invalid{% endif %}"
+                   placeholder="Повторите пароль"
+                   required>
+            {% if form.password_confirm.errors %}
+                <div class="field-error">
+                    {% for error in form.password_confirm.errors %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
         <div class="checkbox-group">
             <input type="checkbox"
                    name="{{ form.agree_data_processing.html_name }}"

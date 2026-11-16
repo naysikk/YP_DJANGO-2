@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib import messages
 from .forms import UserRegisterForm, UserLoginForm
 
@@ -25,7 +25,7 @@ def login_view(request):
     if request.user.is_authenticated:
         if request.user.is_staff or request.user.is_superuser:
             return redirect('admin_panel')
-        return redirect('cabinet')
+        return redirect('index')
 
     if request.method == 'POST':
         form = UserLoginForm(request.POST)
@@ -39,12 +39,9 @@ def login_view(request):
                 return redirect(next_url)
             if user.is_staff or user.is_superuser:
                 return redirect('admin_panel')
-            return redirect('cabinet')
+            return redirect('index')
         else:
-            form = UserLoginForm()
-
-        return render(request, 'Неверный пароль')
-
+            messages.error(request, 'Неверный логин или пароль')
     else:
         form = UserLoginForm()
 
@@ -60,6 +57,10 @@ def index(request):
     }
     return render(request, 'index.html', contex)
 
+def logout_view(request):
+    logout(request)
+    messages.info(request,'Вы успешно вышли из системы')
+    return redirect('index')
 
 
 
